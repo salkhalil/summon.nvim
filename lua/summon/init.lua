@@ -7,11 +7,7 @@ local default_globals = {
     height = 0.85,
     border = "rounded",
     close_keymap = "<Esc><Esc>",
-    highlights = {
-        float = { bg = "#282828" },
-        border = { fg = "#d79921", bg = "#282828" },
-        title = { fg = "#282828", bg = "#d79921", bold = true },
-    },
+    highlights = nil, -- nil = auto-detect from colorscheme
 }
 
 local default_commands = {
@@ -24,10 +20,28 @@ local default_commands = {
 
 local config = {}
 
+local function detect_highlights()
+    local normal = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
+    local border = vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false })
+    local title = vim.api.nvim_get_hl(0, { name = "FloatTitle", link = false })
+
+    -- Fall back to Normal if NormalFloat isn't defined
+    if not normal.bg then
+        normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+    end
+
+    return {
+        float = { bg = normal.bg },
+        border = { fg = border.fg or normal.fg, bg = normal.bg },
+        title = { fg = title.fg or normal.bg, bg = title.bg or border.fg or normal.fg, bold = true },
+    }
+end
+
 local function set_highlights()
-    vim.api.nvim_set_hl(0, "SummonFloat", config.highlights.float)
-    vim.api.nvim_set_hl(0, "SummonBorder", config.highlights.border)
-    vim.api.nvim_set_hl(0, "SummonTitle", config.highlights.title)
+    local hl = config.highlights or detect_highlights()
+    vim.api.nvim_set_hl(0, "SummonFloat", hl.float)
+    vim.api.nvim_set_hl(0, "SummonBorder", hl.border)
+    vim.api.nvim_set_hl(0, "SummonTitle", hl.title)
 end
 
 function M.open(name)
@@ -99,9 +113,27 @@ function M.setup(opts)
         config.commands = default_commands
     end
 
-    vim.g.terminal_color_0 = config.highlights.float.bg or "#282828"
-
     set_highlights()
+
+    -- Sync terminal ANSI black with float background
+    local hl = config.highlights or detect_highlights()
+    if hl.float.bg then
+        vim.g.terminal_color_0 = string.format("#%06x", hl.float.bg)
+    end
+
+    -- Re-apply highlights when colorscheme changes (only matters for auto-detect)
+    if not config.highlights then
+        vim.api.nvim_create_autocmd("ColorScheme", {
+            group = vim.api.nvim_create_augroup("SummonHighlights", { clear = true }),
+            callback = function()
+                set_highlights()
+                local detected = detect_highlights()
+                if detected.float.bg then
+                    vim.g.terminal_color_0 = string.format("#%06x", detected.float.bg)
+                end
+            end,
+        })
+    end
 
     -- Bind keymaps for each command that has one
     for name, cmd_config in pairs(config.commands) do
