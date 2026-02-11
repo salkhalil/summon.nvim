@@ -13,15 +13,6 @@ A Neovim plugin for launching terminal commands in persistent floating windows.
 }
 ```
 
-### Local development
-
-```lua
-{
-    dir = "~/Documents/apps/summon.nvim",
-    opts = {},
-}
-```
-
 ## Configuration
 
 Calling `setup()` with no arguments gives you a single floating terminal running `claude` on `<leader>c`.
