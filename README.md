@@ -51,15 +51,15 @@ require("summon").setup({
 
 Each entry in `commands` supports:
 
-| Option | Description | Default |
-|---|---|---|
-| `command` | Shell command to run | (required) |
-| `title` | Float window title | `" <name> "` |
-| `keymap` | Normal mode keymap to open | `nil` (no binding) |
-| `width` | Float width (0-1 ratio) | Global `width` |
-| `height` | Float height (0-1 ratio) | Global `height` |
-| `border` | Border style | Global `border` |
-| `close_keymap` | Terminal mode keymap to dismiss | Global `close_keymap` |
+| Option          | Description                        | Default                              |
+|-----------------|------------------------------------|--------------------------------------|
+| `command`       | Shell command to run               | (required)                           |
+| `title`         | Float window title                 | `" <name> "`                         |
+| `keymap`        | Normal mode keymap to open float   | `nil` (no binding)                   |
+| `width`         | Float width (0-1 ratio)            | `0.85` (or global `width`)           |
+| `height`        | Float height (0-1 ratio)           | `0.85` (or global `height`)          |
+| `border`        | Border style                       | `"rounded"` (or global `border`)     |
+| `close_keymap`  | Terminal mode keymap to dismiss    | `"<Esc><Esc>"` (or global `close_keymap`) |
 
 ## Usage
 
