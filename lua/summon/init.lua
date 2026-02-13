@@ -8,6 +8,7 @@ local default_globals = {
     border = "rounded",
     close_keymap = "<Esc><Esc>",
     highlights = nil, -- nil = auto-detect from colorscheme
+    terminal_passthrough_keys = { "<C-o>", "<C-i>" },
 }
 
 local default_commands = {
@@ -97,7 +98,19 @@ function M.open(name)
         if vim.api.nvim_win_is_valid(win) then
             vim.api.nvim_win_close(win, false)
         end
-    end, { buffer = bufs[name] })
+    end, { buffer = bufs[name], nowait = true })
+
+    -- Set up passthrough keymaps for terminal mode
+    local passthrough_keys = cmd_config.terminal_passthrough_keys or config.terminal_passthrough_keys
+    if passthrough_keys and #passthrough_keys > 0 then
+        for _, key in ipairs(passthrough_keys) do
+            pcall(vim.keymap.set, "t", key, key, {
+                buffer = bufs[name],
+                nowait = true,
+                desc = "Pass " .. key .. " to terminal"
+            })
+        end
+    end
 end
 
 function M.setup(opts)
