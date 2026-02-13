@@ -22,19 +22,27 @@ local default_commands = {
 local config = {}
 
 local function detect_highlights()
-    local normal = vim.api.nvim_get_hl(0, { name = "NormalFloat", link = false })
+    local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+    local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat" })
     local border = vim.api.nvim_get_hl(0, { name = "FloatBorder", link = false })
     local title = vim.api.nvim_get_hl(0, { name = "FloatTitle", link = false })
 
-    -- Fall back to Normal if NormalFloat isn't defined
-    if not normal.bg then
-        normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+    -- Only use NormalFloat bg if the colorscheme explicitly links or defines it,
+    -- otherwise many colorschemes leave it at Neovim's default which looks out of place
+    local bg = normal.bg
+    local fg = normal.fg
+    if normal_float.link then
+        local resolved = vim.api.nvim_get_hl(0, { name = normal_float.link, link = false })
+        bg = resolved.bg or bg
+    elseif normal_float.bg and normal_float.fg then
+        -- Both fg and bg set suggests intentional colorscheme definition
+        bg = normal_float.bg
     end
 
     return {
-        float = { bg = normal.bg },
-        border = { fg = border.fg or normal.fg, bg = normal.bg },
-        title = { fg = title.fg or normal.bg, bg = title.bg or border.fg or normal.fg, bold = true },
+        float = { bg = bg },
+        border = { fg = border.fg or fg, bg = bg },
+        title = { fg = title.fg or bg, bg = title.bg or border.fg or fg, bold = true },
     }
 end
 
