@@ -1,6 +1,6 @@
 # summon.nvim
 
-A Neovim plugin for launching terminal commands in persistent floating windows.
+A Neovim plugin for launching terminal commands and opening files in persistent floating windows.
 
 ## Installation
 
@@ -34,16 +34,25 @@ require("summon").setup({
     -- Named commands
     commands = {
         claude = {
+            type = "terminal", -- or "file"
             command = "claude",
             title = " Claude ",
             keymap = "<leader>c",
         },
         lazygit = {
+            type = "terminal",
             command = "lazygit",
             title = " LazyGit ",
             keymap = "<leader>gg",
             height = 0.9, -- override global default
             terminal_passthrough_keys = {}, -- disable passthrough for lazygit
+        },
+        todos = {
+            type = "file",
+            command = "~/Documents/todos.md",
+            title = " TODOs ",
+            keymap = "<leader>t",
+            filetype = "markdown", -- optional: override auto-detected filetype
         },
     },
 })
@@ -64,16 +73,18 @@ require("summon").setup({
 
 Each entry in `commands` supports:
 
-| Option                      | Description                                  | Default                              |
-|-----------------------------|----------------------------------------------|--------------------------------------|
-| `command`                   | Shell command to run                         | (required)                           |
-| `title`                     | Float window title                           | `" <name> "`                         |
-| `keymap`                    | Normal mode keymap to open float             | `nil` (no binding)                   |
-| `width`                     | Float width (0-1 ratio)                      | `0.85` (or global `width`)           |
-| `height`                    | Float height (0-1 ratio)                     | `0.85` (or global `height`)          |
-| `border`                    | Border style                                 | `"rounded"` (or global `border`)     |
-| `close_keymap`              | Terminal mode keymap to dismiss              | `"<Esc><Esc>"` (or global `close_keymap`) |
-| `terminal_passthrough_keys` | Keys passed to terminal (overrides global)   | (global `terminal_passthrough_keys`) |
+| Option                      | Description                                     | Default                              |
+|-----------------------------|-------------------------------------------------|--------------------------------------|
+| `type`                      | Buffer type: `"terminal"` or `"file"`           | `"terminal"`                         |
+| `command`                   | Shell command (terminal) or file path (file)    | (required)                           |
+| `title`                     | Float window title                              | `" <name> "`                         |
+| `keymap`                    | Normal mode keymap to open float                | `nil` (no binding)                   |
+| `width`                     | Float width (0-1 ratio)                         | `0.85` (or global `width`)           |
+| `height`                    | Float height (0-1 ratio)                        | `0.85` (or global `height`)          |
+| `border`                    | Border style                                    | `"rounded"` (or global `border`)     |
+| `close_keymap`              | Keymap to dismiss (mode depends on type)        | `"<Esc><Esc>"` (or global `close_keymap`) |
+| `terminal_passthrough_keys` | Keys passed to terminal (terminal type only)    | (global `terminal_passthrough_keys`) |
+| `filetype`                  | Override filetype detection (file type only)    | `nil` (auto-detect)                  |
 
 ## Usage
 
@@ -93,10 +104,19 @@ Keymaps defined in `commands` open the corresponding float directly. The default
 
 ### Behaviour
 
+**Terminal buffers:**
 - Terminal buffers persist after closing the float — reopening reattaches to the same session.
 - Each command gets its own independent buffer.
-- Close the float with `<Esc><Esc>` (configurable) without killing the process.
+- Opens in insert mode automatically.
+- Close the float with `<Esc><Esc>` (configurable) in terminal mode without killing the process.
 - Configured keys in `terminal_passthrough_keys` are passed directly to the terminal application instead of being intercepted by Neovim (useful for TUI apps that need Ctrl+O, Ctrl+I, etc.).
+
+**File buffers:**
+- File buffers persist with any unsaved changes when the float is closed.
+- Files are automatically created if they don't exist (with tilde expansion support).
+- Opens in normal mode.
+- Close the float with `q` or the configured `close_keymap` in normal mode.
+- Neovim will prompt before closing if there are unsaved changes.
 
 ## Features
 
@@ -128,3 +148,42 @@ require("summon").setup({
     },
 })
 ```
+
+### File Buffers
+
+Open files in floating windows with the same convenient interface as terminal commands. Perfect for quick notes, TODOs, or any file you want to access quickly.
+
+**Basic file buffer:**
+```lua
+require("summon").setup({
+    commands = {
+        notes = {
+            type = "file",
+            command = "~/Documents/notes.txt",
+            keymap = "<leader>n",
+        },
+    },
+})
+```
+
+**With custom filetype:**
+```lua
+require("summon").setup({
+    commands = {
+        todos = {
+            type = "file",
+            command = "~/Documents/todos.md",
+            title = " TODOs ",
+            keymap = "<leader>t",
+            filetype = "markdown", -- force markdown syntax highlighting
+        },
+    },
+})
+```
+
+**Features:**
+- Files are automatically created if they don't exist
+- Tilde expansion works (`~/path/to/file`)
+- Buffers persist with unsaved changes
+- Auto-detected filetype (or override with `filetype` option)
+- Opens in normal mode (use `q` to close)

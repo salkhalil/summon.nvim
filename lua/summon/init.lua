@@ -59,18 +59,50 @@ function M.open(name)
     local close_keymap = cmd_config.close_keymap or config.close_keymap
     local title = cmd_config.title or (" " .. name .. " ")
 
-    -- Reuse existing terminal buffer if still valid
+    -- Determine buffer type (default to "terminal" for backward compatibility)
+    local buffer_type = cmd_config.type or "terminal"
+
+    -- Reuse existing buffer if still valid
     if bufs[name] and vim.api.nvim_buf_is_valid(bufs[name]) then
         -- buffer exists, reuse it
     else
         bufs[name] = vim.api.nvim_create_buf(false, true)
-        vim.api.nvim_buf_call(bufs[name], function()
-            vim.fn.termopen(cmd_config.command, {
-                on_exit = function()
-                    bufs[name] = nil
-                end,
-            })
-        end)
+
+        if buffer_type == "terminal" then
+            -- Create terminal buffer
+            vim.api.nvim_buf_call(bufs[name], function()
+                vim.fn.termopen(cmd_config.command, {
+                    on_exit = function()
+                        bufs[name] = nil
+                    end,
+                })
+            end)
+        elseif buffer_type == "file" then
+            -- Create file buffer
+            local file_path = vim.fn.expand(cmd_config.command)
+
+            -- Always create file if it doesn't exist
+            if vim.fn.filereadable(file_path) == 0 then
+                vim.fn.writefile({}, file_path)
+            end
+
+            -- Load file into buffer
+            vim.api.nvim_buf_call(bufs[name], function()
+                vim.cmd("silent! edit " .. vim.fn.fnameescape(file_path))
+            end)
+
+            -- Set buffer options
+            vim.bo[bufs[name]].swapfile = false
+            vim.bo[bufs[name]].bufhidden = "wipe"
+
+            -- Override filetype if specified
+            if cmd_config.filetype then
+                vim.bo[bufs[name]].filetype = cmd_config.filetype
+            end
+        else
+            vim.notify("Summon: unknown buffer type '" .. buffer_type .. "'", vim.log.levels.ERROR)
+            return
+        end
     end
 
     local w = math.floor(vim.o.columns * width)
@@ -92,24 +124,45 @@ function M.open(name)
 
     vim.api.nvim_win_set_option(win, "winhl", "Normal:SummonFloat,FloatBorder:SummonBorder,FloatTitle:SummonTitle")
 
-    vim.cmd("startinsert")
+    -- Set up keymaps based on buffer type
+    if buffer_type == "terminal" then
+        -- Enter insert mode for terminal buffers
+        vim.cmd("startinsert")
 
-    vim.keymap.set("t", close_keymap, function()
-        if vim.api.nvim_win_is_valid(win) then
-            vim.api.nvim_win_close(win, false)
-        end
-    end, { buffer = bufs[name], nowait = true })
+        -- Close keymap in terminal mode
+        vim.keymap.set("t", close_keymap, function()
+            if vim.api.nvim_win_is_valid(win) then
+                vim.api.nvim_win_close(win, false)
+            end
+        end, { buffer = bufs[name], nowait = true })
 
-    -- Set up passthrough keymaps for terminal mode
-    local passthrough_keys = cmd_config.terminal_passthrough_keys or config.terminal_passthrough_keys
-    if passthrough_keys and #passthrough_keys > 0 then
-        for _, key in ipairs(passthrough_keys) do
-            pcall(vim.keymap.set, "t", key, key, {
-                buffer = bufs[name],
-                nowait = true,
-                desc = "Pass " .. key .. " to terminal"
-            })
+        -- Set up passthrough keymaps for terminal mode
+        local passthrough_keys = cmd_config.terminal_passthrough_keys or config.terminal_passthrough_keys
+        if passthrough_keys and #passthrough_keys > 0 then
+            for _, key in ipairs(passthrough_keys) do
+                pcall(vim.keymap.set, "t", key, key, {
+                    buffer = bufs[name],
+                    nowait = true,
+                    desc = "Pass " .. key .. " to terminal"
+                })
+            end
         end
+    elseif buffer_type == "file" then
+        -- Stay in normal mode for file buffers
+
+        -- Close keymap in normal mode
+        vim.keymap.set("n", close_keymap, function()
+            if vim.api.nvim_win_is_valid(win) then
+                vim.api.nvim_win_close(win, false)
+            end
+        end, { buffer = bufs[name], nowait = true })
+
+        -- Also map 'q' for quick exit
+        vim.keymap.set("n", "q", function()
+            if vim.api.nvim_win_is_valid(win) then
+                vim.api.nvim_win_close(win, false)
+            end
+        end, { buffer = bufs[name], nowait = true })
     end
 end
 
