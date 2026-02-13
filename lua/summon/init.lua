@@ -66,10 +66,9 @@ function M.open(name)
     if bufs[name] and vim.api.nvim_buf_is_valid(bufs[name]) then
         -- buffer exists, reuse it
     else
-        bufs[name] = vim.api.nvim_create_buf(false, true)
-
         if buffer_type == "terminal" then
             -- Create terminal buffer
+            bufs[name] = vim.api.nvim_create_buf(false, true)
             vim.api.nvim_buf_call(bufs[name], function()
                 vim.fn.termopen(cmd_config.command, {
                     on_exit = function()
@@ -86,10 +85,8 @@ function M.open(name)
                 vim.fn.writefile({}, file_path)
             end
 
-            -- Load file into buffer
-            vim.api.nvim_buf_call(bufs[name], function()
-                vim.cmd("silent! edit " .. vim.fn.fnameescape(file_path))
-            end)
+            bufs[name] = vim.fn.bufadd(file_path)
+            vim.fn.bufload(bufs[name])
 
             -- Set buffer options
             vim.bo[bufs[name]].swapfile = false
