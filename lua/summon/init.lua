@@ -86,10 +86,8 @@ function M.open(name)
             end
 
             bufs[name] = vim.fn.bufadd(file_path)
-            vim.fn.bufload(bufs[name])
-
-            -- Set buffer options
             vim.bo[bufs[name]].swapfile = false
+            vim.fn.bufload(bufs[name])
             vim.bo[bufs[name]].bufhidden = "wipe"
 
             -- Override filetype if specified
