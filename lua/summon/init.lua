@@ -21,6 +21,13 @@ local default_commands = {
 
 local config = {}
 
+local function color_to_hex(val)
+    if type(val) == "number" then
+        return string.format("#%06x", val)
+    end
+    return val
+end
+
 local function detect_highlights()
     local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
     local normal_float = vim.api.nvim_get_hl(0, { name = "NormalFloat" })
@@ -186,12 +193,26 @@ function M.setup(opts)
         config.commands = default_commands
     end
 
+    -- Validate highlight color fields
+    if config.highlights then
+        for group, attrs in pairs(config.highlights) do
+            for key, val in pairs(attrs) do
+                if (key == "fg" or key == "bg") and type(val) ~= "string" and type(val) ~= "number" then
+                    vim.notify(
+                        string.format("summon.nvim: highlights.%s.%s should be a hex string (e.g. \"#282828\") or number, got %s", group, key, type(val)),
+                        vim.log.levels.WARN
+                    )
+                end
+            end
+        end
+    end
+
     set_highlights()
 
     -- Sync terminal ANSI black with float background
     local hl = config.highlights or detect_highlights()
     if hl.float.bg then
-        vim.g.terminal_color_0 = string.format("#%06x", hl.float.bg)
+        vim.g.terminal_color_0 = color_to_hex(hl.float.bg)
     end
 
     -- Re-apply highlights when colorscheme changes (only matters for auto-detect)
@@ -202,7 +223,7 @@ function M.setup(opts)
                 set_highlights()
                 local detected = detect_highlights()
                 if detected.float.bg then
-                    vim.g.terminal_color_0 = string.format("#%06x", detected.float.bg)
+                    vim.g.terminal_color_0 = color_to_hex(detected.float.bg)
                 end
             end,
         })

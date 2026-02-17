@@ -29,6 +29,7 @@ require("summon").setup({
         border = { fg = "#d79921", bg = "#282828" },
         title = { fg = "#282828", bg = "#d79921", bold = true },
     },
+    -- Colors accept hex strings ("#282828") or integers (0x282828)
     terminal_passthrough_keys = { "<C-o>", "<C-i>" }, -- keys passed to terminal apps
 
     -- Named commands
@@ -66,7 +67,7 @@ require("summon").setup({
 | `height`                    | Default float height (0-1 ratio)           | `0.85`                               |
 | `border`                    | Default border style                       | `"rounded"`                          |
 | `close_keymap`              | Default keymap to dismiss float            | `"<Esc><Esc>"`                       |
-| `highlights`                | Custom highlight groups                    | `nil` (auto-detect from colorscheme) |
+| `highlights`                | Custom highlight groups (hex strings or integers for colors) | `nil` (auto-detect from colorscheme) |
 | `terminal_passthrough_keys` | Keys passed through to terminal apps       | `{ "<C-o>", "<C-i>" }`               |
 
 ### Command options
