@@ -67,6 +67,13 @@ local function set_highlights()
     vim.api.nvim_set_hl(0, "SummonTitle", hl.title)
 end
 
+local function set_command_highlights(name, border_color)
+    local hl = config.highlights or detect_highlights()
+    local float_bg = hl.float.bg
+    vim.api.nvim_set_hl(0, "SummonBorder_" .. name, { fg = border_color, bg = float_bg })
+    vim.api.nvim_set_hl(0, "SummonTitle_" .. name, { fg = float_bg, bg = border_color, bold = true })
+end
+
 function M.open(name)
     local cmd_config = config.commands[name]
     if not cmd_config then
@@ -149,7 +156,13 @@ function M.open(name)
         style = "minimal",
     })
 
-    vim.api.nvim_win_set_option(win, "winhl", "Normal:SummonFloat,FloatBorder:SummonBorder,FloatTitle:SummonTitle")
+    local winhl = "Normal:SummonFloat,FloatBorder:SummonBorder,FloatTitle:SummonTitle"
+    if cmd_config.border_color then
+        set_command_highlights(name, cmd_config.border_color)
+        winhl = "Normal:SummonFloat,FloatBorder:SummonBorder_" .. name .. ",FloatTitle:SummonTitle_" .. name
+    end
+
+    vim.api.nvim_win_set_option(win, "winhl", winhl)
 
     -- Set up keymaps based on buffer type
     if buffer_type == "terminal" then
@@ -220,6 +233,19 @@ function M.setup(opts)
         end
     end
 
+    for cmd_name, cmd_cfg in pairs(config.commands) do
+        if cmd_cfg.border_color and type(cmd_cfg.border_color) ~= "string" and type(cmd_cfg.border_color) ~= "number" then
+            vim.notify(
+                string.format(
+                    'summon.nvim: commands.%s.border_color should be a hex string (e.g. "#e78a4e") or number, got %s',
+                    cmd_name,
+                    type(cmd_cfg.border_color)
+                ),
+                vim.log.levels.WARN
+            )
+        end
+    end
+
     set_highlights()
 
     -- Sync terminal ANSI black with float background
@@ -237,6 +263,11 @@ function M.setup(opts)
                 local detected = detect_highlights()
                 if detected.float.bg then
                     vim.g.terminal_color_0 = color_to_hex(detected.float.bg)
+                end
+                for cmd_name, cmd_cfg in pairs(config.commands) do
+                    if cmd_cfg.border_color then
+                        set_command_highlights(cmd_name, cmd_cfg.border_color)
+                    end
                 end
             end,
         })
