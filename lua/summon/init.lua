@@ -51,7 +51,7 @@ local function detect_highlights()
     end
 
     -- Prefer the colorscheme's accent color (Title) over plain Normal fg for borders
-    local accent = border.fg or title_hl.fg or fg
+    local accent = border.fg or fg
 
     return {
         float = { fg = float_fg, bg = bg },
