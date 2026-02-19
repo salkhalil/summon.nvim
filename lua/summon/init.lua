@@ -91,6 +91,16 @@ function M.open(name)
         if buffer_type == "terminal" then
             -- Create terminal buffer
             bufs[name] = vim.api.nvim_create_buf(false, true)
+
+            -- Set buffer-local terminal foreground colors so ANSI text has
+            -- proper contrast against the float background
+            local hl = config.highlights or detect_highlights()
+            if hl.float.fg then
+                local fg_hex = color_to_hex(hl.float.fg)
+                vim.b[bufs[name]].terminal_color_7 = fg_hex
+                vim.b[bufs[name]].terminal_color_15 = fg_hex
+            end
+
             vim.api.nvim_buf_call(bufs[name], function()
                 vim.fn.termopen(cmd_config.command, {
                     on_exit = function()
