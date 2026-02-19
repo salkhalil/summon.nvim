@@ -39,19 +39,22 @@ local function detect_highlights()
     -- otherwise many colorschemes leave it at Neovim's default which looks out of place
     local bg = normal.bg
     local fg = normal.fg
+    local float_fg = fg
     if normal_float.link then
         local resolved = vim.api.nvim_get_hl(0, { name = normal_float.link, link = false })
         bg = resolved.bg or bg
+        float_fg = resolved.fg or float_fg
     elseif normal_float.bg and normal_float.fg then
         -- Both fg and bg set suggests intentional colorscheme definition
         bg = normal_float.bg
+        float_fg = normal_float.fg
     end
 
     -- Prefer the colorscheme's accent color (Title) over plain Normal fg for borders
     local accent = border.fg or title_hl.fg or fg
 
     return {
-        float = { bg = bg },
+        float = { fg = float_fg, bg = bg },
         border = { fg = accent, bg = bg },
         title = { fg = title.fg or bg, bg = title.bg or accent, bold = true },
     }
