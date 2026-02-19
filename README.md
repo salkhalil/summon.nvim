@@ -2,7 +2,7 @@
 
 A Neovim plugin for launching terminal commands and opening files in persistent floating windows.
 
-[![Demo](docs/demo.gif)](https://github.com/user-attachments/assets/27df730b-b872-463a-8e65-2714b6e5aa51)
+![Demo](docs/demo.gif)
 
 ## Installation
 
