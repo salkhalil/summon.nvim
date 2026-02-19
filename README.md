@@ -46,6 +46,7 @@ require("summon").setup({
             title = " LazyGit ",
             keymap = "<leader>gg",
             height = 0.9, -- override global default
+            border_color = "#89b4fa", -- custom border + title badge color
             terminal_passthrough_keys = {}, -- disable passthrough for lazygit
         },
         todos = {
@@ -85,6 +86,7 @@ Each entry in `commands` supports:
 | `border`                    | Border style                                    | `"rounded"` (or global `border`)     |
 | `close_keymap`              | Keymap to dismiss (mode depends on type)        | `"<Esc><Esc>"` (or global `close_keymap`) |
 | `terminal_passthrough_keys` | Keys passed to terminal (terminal type only)    | (global `terminal_passthrough_keys`) |
+| `border_color`              | Custom border and title badge color (hex string or integer) | `nil` (uses global highlight)        |
 | `filetype`                  | Override filetype detection (file type only)    | `nil` (auto-detect)                  |
 
 ## Usage
@@ -149,6 +151,31 @@ require("summon").setup({
     },
 })
 ```
+
+### Per-Command Border Colors
+
+Give each command its own border color so you can tell windows apart at a glance. The title badge automatically uses the same color as the border background, keeping the appearance cohesive.
+
+```lua
+require("summon").setup({
+    commands = {
+        claude = {
+            command = "claude",
+            title = " Claude ",
+            keymap = "<leader>c",
+            border_color = "#e78a4e",
+        },
+        lazygit = {
+            command = "lazygit",
+            title = " LazyGit ",
+            keymap = "<leader>gg",
+            border_color = "#89b4fa",
+        },
+    },
+})
+```
+
+Colors accept hex strings (`"#e78a4e"`) or integers (`0xe78a4e`). Commands without `border_color` use the global `highlights` setting (or the auto-detected colorscheme accent).
 
 ### File Buffers
 
