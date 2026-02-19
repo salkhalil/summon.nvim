@@ -210,6 +210,7 @@ require("summon").setup({
 ```
 
 **Features:**
+
 - Files are automatically created if they don't exist
 - Tilde expansion works (`~/path/to/file`)
 - Buffers persist with unsaved changes
