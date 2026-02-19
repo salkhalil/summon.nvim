@@ -2,6 +2,8 @@
 
 A Neovim plugin for launching terminal commands and opening files in persistent floating windows.
 
+![Demo](docs/summon_demo.gif)
+
 ## Installation
 
 ### lazy.nvim
