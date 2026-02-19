@@ -14,6 +14,7 @@ local default_commands = {
         command = "claude",
         title = " Claude ",
         keymap = "<leader>c",
+        border_color = "#FFA500"
     },
 }
 
