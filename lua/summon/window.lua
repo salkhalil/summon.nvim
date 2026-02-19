@@ -117,6 +117,7 @@ function M.open(name)
 
         vim.keymap.set("n", "q", function()
             if vim.api.nvim_win_is_valid(win) then
+                vim.cmd("silent! write")
                 vim.api.nvim_win_close(win, false)
             end
         end, { buffer = bufs[name], nowait = true })
