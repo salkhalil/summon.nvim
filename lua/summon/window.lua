@@ -53,7 +53,7 @@ function M.open(name)
             bufs[name] = vim.fn.bufadd(file_path)
             vim.bo[bufs[name]].swapfile = false
             vim.fn.bufload(bufs[name])
-            vim.bo[bufs[name]].bufhidden = "wipe"
+            vim.bo[bufs[name]].bufhidden = "hide"
 
             if cmd_config.filetype then
                 vim.bo[bufs[name]].filetype = cmd_config.filetype
