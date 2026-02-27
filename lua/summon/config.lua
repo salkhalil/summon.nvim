@@ -62,6 +62,13 @@ local function validate(cfg)
             )
         end
 
+        if cmd_cfg.reload ~= nil and type(cmd_cfg.reload) ~= "boolean" then
+            vim.notify(
+                string.format("summon.nvim: commands.%s.reload should be a boolean", cmd_name),
+                vim.log.levels.WARN
+            )
+        end
+
         if cmd_cfg.border_color and type(cmd_cfg.border_color) ~= "string" and type(cmd_cfg.border_color) ~= "number" then
             vim.notify(
                 string.format(

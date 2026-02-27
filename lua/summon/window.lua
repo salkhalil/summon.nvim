@@ -114,6 +114,11 @@ function M.open(name)
 
     local buffer_key = get_buffer_key(buffer_type, name, file_path)
 
+    if cmd_config.reload and bufs[buffer_key] and vim.api.nvim_buf_is_valid(bufs[buffer_key]) then
+        vim.api.nvim_buf_delete(bufs[buffer_key], { force = true })
+        bufs[buffer_key] = nil
+    end
+
     if bufs[buffer_key] and vim.api.nvim_buf_is_valid(bufs[buffer_key]) then
         -- buffer exists, reuse it
     else

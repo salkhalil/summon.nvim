@@ -98,6 +98,7 @@ Each entry in `commands` supports:
 | `terminal_passthrough_keys` | Keys passed to terminal (terminal type only)    | (global `terminal_passthrough_keys`) |
 | `border_color`              | Custom border and title badge color (hex string or integer) | `nil` (uses global highlight)        |
 | `filetype`                  | Override filetype detection (file type only)    | `nil` (auto-detect)                  |
+| `reload`                    | Destroy and re-run terminal on each open (terminal only) | `false`                     |
 | `root_pattern`              | Project root marker for `project_file`          | `".git"`                             |
 
 ## Usage
@@ -158,6 +159,23 @@ require("summon").setup({
         lazygit = {
             command = "lazygit",
             terminal_passthrough_keys = {}, -- disable passthrough for lazygit
+        },
+    },
+})
+```
+
+### Reload Mode
+
+By default, terminal buffers persist — closing the float keeps the process alive and reopening reattaches to the same session. For one-shot commands like test runners or build scripts, set `reload = true` to destroy the old buffer and re-run the command every time you open the float.
+
+```lua
+require("summon").setup({
+    commands = {
+        tests = {
+            type = "terminal",
+            command = "make test",
+            reload = true,
+            keymap = "<leader>t",
         },
     },
 })
