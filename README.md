@@ -33,6 +33,8 @@ require("summon").setup({
     },
     -- Colors accept hex strings ("#282828") or integers (0x282828)
     terminal_passthrough_keys = { "<C-o>", "<C-i>" }, -- keys passed to terminal apps
+    select_keymap = "<leader>s", -- keymap to open the command picker
+    picker = "auto", -- "auto", "fzf", or "vim"
 
     -- Named commands
     commands = {
@@ -80,6 +82,8 @@ require("summon").setup({
 | `close_keymap`              | Default keymap to dismiss float            | `"<Esc><Esc>"`                       |
 | `highlights`                | Custom highlight groups (hex strings or integers for colors) | `nil` (auto-detect from colorscheme) |
 | `terminal_passthrough_keys` | Keys passed through to terminal apps       | `{ "<C-o>", "<C-i>" }`               |
+| `select_keymap`             | Keymap to open the command picker           | `nil` (no binding)                   |
+| `picker`                    | Picker backend: `"auto"`, `"fzf"`, or `"vim"` | `"auto"`                          |
 
 ### Command options
 
@@ -112,10 +116,29 @@ Keymaps defined in `commands` open the corresponding float directly. The default
 ```vim
 :Summon claude     " open a specific command by name
 :Summon lazygit
-:Summon            " opens automatically if only one command is configured
+:Summon            " open picker if multiple commands, or open directly if only one
 ```
 
 `:Summon` supports tab completion for command names.
+
+### Command Picker
+
+When you have multiple commands configured, `:Summon` (with no arguments) opens a picker to choose one. You can also bind a key to open the picker directly:
+
+```lua
+require("summon").setup({
+    select_keymap = "<leader>s",
+    picker = "fzf", -- "auto" | "fzf" | "vim"
+})
+```
+
+**Picker backends:**
+
+| Value    | Description                                                     |
+|----------|-----------------------------------------------------------------|
+| `"auto"` | Uses [fzf-lua](https://github.com/ibhagwan/fzf-lua) if installed, otherwise falls back to `vim.ui.select` |
+| `"fzf"`  | Use fzf-lua (requires [fzf-lua](https://github.com/ibhagwan/fzf-lua)) |
+| `"vim"`  | Use Neovim's built-in `vim.ui.select`                           |
 
 ### Behaviour
 

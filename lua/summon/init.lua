@@ -1,5 +1,6 @@
 local config = require("summon.config")
 local highlights = require("summon.highlights")
+local picker = require("summon.picker")
 local window = require("summon.window")
 
 local M = {}
@@ -58,7 +59,8 @@ function M.setup(opts)
 end
 
 function M.pick()
-    local commands = config.get().commands or {}
+    local cfg = config.get()
+    local commands = cfg.commands or {}
     local names = vim.tbl_keys(commands)
     table.sort(names)
 
@@ -67,25 +69,9 @@ function M.pick()
         return
     end
 
-    vim.ui.select(names, {
-        prompt = "Summon",
-        format_item = function(name)
-            local cmd = commands[name]
-            local parts = { name }
-            if cmd.title then
-                table.insert(parts, cmd.title)
-            end
-            local cmd_type = cmd.type or "terminal"
-            if cmd_type ~= "terminal" then
-                table.insert(parts, "[" .. cmd_type .. "]")
-            end
-            return table.concat(parts, "  ")
-        end,
-    }, function(choice)
-        if choice then
-            M.open(choice)
-        end
-    end)
+    picker.pick(names, commands, function(name)
+        M.open(name)
+    end, cfg.picker)
 end
 
 function M._get_commands()

@@ -8,6 +8,7 @@ local default_globals = {
     highlights = nil, -- nil = auto-detect from colorscheme
     terminal_passthrough_keys = { "<C-o>", "<C-i>" },
     select_keymap = nil,
+    picker = "auto", -- "auto", "fzf", or "vim"
 }
 
 local default_commands = {
@@ -37,6 +38,14 @@ local function validate(cfg)
 
     if cfg.select_keymap ~= nil and type(cfg.select_keymap) ~= "string" then
         vim.notify("summon.nvim: select_keymap should be a string", vim.log.levels.WARN)
+    end
+
+    local valid_pickers = { auto = true, fzf = true, vim = true }
+    if cfg.picker and not valid_pickers[cfg.picker] then
+        vim.notify(
+            string.format('summon.nvim: picker should be "auto", "fzf", or "vim", got %q', tostring(cfg.picker)),
+            vim.log.levels.WARN
+        )
     end
 
     for cmd_name, cmd_cfg in pairs(cfg.commands) do
