@@ -81,7 +81,7 @@ local function open_file_buffer(cache_key, file_path, cmd_config)
     bufs[cache_key] = vim.fn.bufadd(file_path)
     vim.bo[bufs[cache_key]].swapfile = false
     vim.fn.bufload(bufs[cache_key])
-    vim.bo[bufs[cache_key]].bufhidden = "wipe"
+    vim.bo[bufs[cache_key]].bufhidden = "hide"
 
     if cmd_config.filetype then
         vim.bo[bufs[cache_key]].filetype = cmd_config.filetype
