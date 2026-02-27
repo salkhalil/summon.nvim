@@ -35,6 +35,33 @@ local function validate(cfg)
     end
 
     for cmd_name, cmd_cfg in pairs(cfg.commands) do
+        local cmd_type = cmd_cfg.type or "terminal"
+
+        if cmd_type ~= "terminal" and cmd_type ~= "file" and cmd_type ~= "project_file" then
+            vim.notify(
+                string.format(
+                    'summon.nvim: commands.%s.type should be "terminal", "file", or "project_file", got %q',
+                    cmd_name,
+                    tostring(cmd_type)
+                ),
+                vim.log.levels.WARN
+            )
+        end
+
+        if type(cmd_cfg.command) ~= "string" then
+            vim.notify(
+                string.format("summon.nvim: commands.%s.command should be a string", cmd_name),
+                vim.log.levels.WARN
+            )
+        end
+
+        if cmd_type == "project_file" and cmd_cfg.root_pattern ~= nil and type(cmd_cfg.root_pattern) ~= "string" then
+            vim.notify(
+                string.format("summon.nvim: commands.%s.root_pattern should be a string", cmd_name),
+                vim.log.levels.WARN
+            )
+        end
+
         if cmd_cfg.border_color and type(cmd_cfg.border_color) ~= "string" and type(cmd_cfg.border_color) ~= "number" then
             vim.notify(
                 string.format(

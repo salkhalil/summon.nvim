@@ -37,7 +37,7 @@ require("summon").setup({
     -- Named commands
     commands = {
         claude = {
-            type = "terminal", -- or "file"
+            type = "terminal", -- or "file" / "project_file"
             command = "claude",
             title = " Claude ",
             keymap = "<leader>c",
@@ -57,6 +57,14 @@ require("summon").setup({
             title = " TODOs ",
             keymap = "<leader>t",
             filetype = "markdown", -- optional: override auto-detected filetype
+        },
+        project_notes = {
+            type = "project_file",
+            command = ".summon/notes.md", -- created relative to the nearest .git
+            title = " Project Notes ",
+            keymap = "<leader>pn",
+            root_pattern = ".git", -- optional, defaults to .git
+            filetype = "markdown",
         },
     },
 })
@@ -79,8 +87,8 @@ Each entry in `commands` supports:
 
 | Option                      | Description                                     | Default                              |
 |-----------------------------|-------------------------------------------------|--------------------------------------|
-| `type`                      | Buffer type: `"terminal"` or `"file"`           | `"terminal"`                         |
-| `command`                   | Shell command (terminal) or file path (file)    | (required)                           |
+| `type`                      | Buffer type: `"terminal"`, `"file"`, or `"project_file"` | `"terminal"`                |
+| `command`                   | Shell command (terminal), file path (file), or project-relative path (`project_file`) | (required) |
 | `title`                     | Float window title                              | `" <name> "`                         |
 | `keymap`                    | Normal mode keymap to open float                | `nil` (no binding)                   |
 | `width`                     | Float width (0-1 ratio)                         | `0.85` (or global `width`)           |
@@ -90,6 +98,7 @@ Each entry in `commands` supports:
 | `terminal_passthrough_keys` | Keys passed to terminal (terminal type only)    | (global `terminal_passthrough_keys`) |
 | `border_color`              | Custom border and title badge color (hex string or integer) | `nil` (uses global highlight)        |
 | `filetype`                  | Override filetype detection (file type only)    | `nil` (auto-detect)                  |
+| `root_pattern`              | Project root marker for `project_file`          | `".git"`                             |
 
 ## Usage
 
@@ -218,3 +227,43 @@ require("summon").setup({
 - Buffers persist with unsaved changes
 - Auto-detected filetype (or override with `filetype` option)
 - Opens in normal mode (use `q` to close)
+
+### Project File Buffers
+
+Open files relative to the nearest project marker instead of a fixed absolute path. This is useful for repo-local notes, scratch files, or metadata you want available in every project.
+
+**Basic project file buffer:**
+```lua
+require("summon").setup({
+    commands = {
+        project_notes = {
+            type = "project_file",
+            command = ".summon/notes.md",
+            keymap = "<leader>pn",
+        },
+    },
+})
+```
+
+**With a custom root marker:**
+```lua
+require("summon").setup({
+    commands = {
+        package_notes = {
+            type = "project_file",
+            command = ".summon/package-notes.md",
+            root_pattern = "package.json",
+            keymap = "<leader>pp",
+        },
+    },
+})
+```
+
+**How it works:**
+
+- Root detection starts from the current buffer's directory when possible
+- If the current buffer is not a normal file, Summon starts from `cwd`
+- Summon searches upward for the nearest ancestor containing `root_pattern`
+- If no marker is found, Summon falls back to `cwd`
+- Parent directories are created automatically before the file is created
+- `filetype`, `q`, and the configured `close_keymap` work the same as regular file buffers
