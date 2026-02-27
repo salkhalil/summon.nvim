@@ -40,6 +40,13 @@ function M.setup(opts)
         })
     end
 
+    -- Bind select keymap if configured
+    if cfg.select_keymap then
+        vim.keymap.set("n", cfg.select_keymap, function()
+            M.pick()
+        end, { desc = "Summon picker" })
+    end
+
     -- Bind keymaps for each command that has one
     for name, cmd_config in pairs(cfg.commands) do
         if cmd_config.keymap then
@@ -48,6 +55,37 @@ function M.setup(opts)
             end, { desc = "Summon " .. name })
         end
     end
+end
+
+function M.pick()
+    local commands = config.get().commands or {}
+    local names = vim.tbl_keys(commands)
+    table.sort(names)
+
+    if #names == 0 then
+        vim.notify("Summon: no commands configured", vim.log.levels.WARN)
+        return
+    end
+
+    vim.ui.select(names, {
+        prompt = "Summon",
+        format_item = function(name)
+            local cmd = commands[name]
+            local parts = { name }
+            if cmd.title then
+                table.insert(parts, cmd.title)
+            end
+            local cmd_type = cmd.type or "terminal"
+            if cmd_type ~= "terminal" then
+                table.insert(parts, "[" .. cmd_type .. "]")
+            end
+            return table.concat(parts, "  ")
+        end,
+    }, function(choice)
+        if choice then
+            M.open(choice)
+        end
+    end)
 end
 
 function M._get_commands()

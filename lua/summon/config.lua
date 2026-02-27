@@ -7,6 +7,7 @@ local default_globals = {
     close_keymap = "<Esc><Esc>",
     highlights = nil, -- nil = auto-detect from colorscheme
     terminal_passthrough_keys = { "<C-o>", "<C-i>" },
+    select_keymap = nil,
 }
 
 local default_commands = {
@@ -32,6 +33,10 @@ local function validate(cfg)
                 end
             end
         end
+    end
+
+    if cfg.select_keymap ~= nil and type(cfg.select_keymap) ~= "string" then
+        vim.notify("summon.nvim: select_keymap should be a string", vim.log.levels.WARN)
     end
 
     for cmd_name, cmd_cfg in pairs(cfg.commands) do

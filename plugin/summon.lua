@@ -8,7 +8,7 @@ vim.api.nvim_create_user_command("Summon", function(opts)
         if #names == 1 then
             summon.open(names[1])
         else
-            vim.notify("Summon: specify a command name — " .. table.concat(names, ", "), vim.log.levels.WARN)
+            summon.pick()
         end
         return
     end
